@@ -95,17 +95,22 @@ public class PlayerAttack : MonoBehaviour
 
     public void OnMouseDirection(InputAction.CallbackContext context)
     {
-        Vector2 playerPosition = Camera.main.WorldToViewportPoint(transform.position);
-        Vector2 mousePosition = Camera.main.ScreenToViewportPoint(context.ReadValue<Vector2>());
+        //Only fires code if the camera is active to prevent errors
+        if(Camera.main != null)
+        {
+            //Checks player and mouse position and stores them as variables
+            Vector2 playerPosition = Camera.main.WorldToViewportPoint(transform.position);
+            Vector2 mousePosition = Camera.main.ScreenToViewportPoint(context.ReadValue<Vector2>());
 
-        float angle = AngleBetweenTwoPoints(playerPosition, mousePosition);
+            float angle = AngleBetweenTwoPoints(playerPosition, mousePosition);
 
-        //Changes the rotation of the attack object so that the player slashes toward their mouse, but only when not attacking
-        if (!isAttacking)
-            attackObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+            //Changes the rotation of the attack object so that the player slashes toward their mouse, but only when not attacking
+            if (!isAttacking)
+                attackObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
-        //Stores a direction based on the mouse's and player's positions
-        attackDirection = mousePosition - playerPosition;
+            //Stores a direction based on the mouse's and player's positions
+            attackDirection = mousePosition - playerPosition;
+        }
     }
 
     public void OnGamepadDirection(InputAction.CallbackContext context)

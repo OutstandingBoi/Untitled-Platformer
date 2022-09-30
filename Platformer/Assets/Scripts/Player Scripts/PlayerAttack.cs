@@ -135,7 +135,7 @@ public class PlayerAttack : MonoBehaviour
     public void OnMouseDirection(InputAction.CallbackContext context)
     {
         //Only fires code if the camera is active to prevent errors
-        if (Camera.main != null)
+        if(Camera.main != null)
         {
             //Checks player and mouse position and stores them as variables
             Vector2 playerPosition = Camera.main.WorldToViewportPoint(transform.position);

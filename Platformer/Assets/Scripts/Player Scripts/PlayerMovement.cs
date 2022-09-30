@@ -179,6 +179,7 @@ public class PlayerMovement : MonoBehaviour
         //We find out which direction the player is inputting, and store it in directionX
         direction = (int)context.ReadValue<float>();
     }
+
     public void OnJump(InputAction.CallbackContext context)
     {
         //Tracks player input of the jump button

@@ -78,4 +78,6 @@ public class Health : MonoBehaviour
             waiting = false;
         }
     }
+
+    public float MaxHealth { get { return maxHealth; } }
 }

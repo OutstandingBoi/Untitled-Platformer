@@ -8,14 +8,16 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] GameObject attackObject;
     Rigidbody2D body;
     PlayerGround ground;
+    PlayerToggleCollision ghost;
     TrailRenderer trail;
     SpriteRenderer sr;
     public Vector2 attackDirection;
 
     [Header("AttackStats")]
-    [SerializeField, Range(0f, 50f)] [Tooltip("Dash distance")] float dashDistance = 14f;
-    [SerializeField, Range(0f, 1f)] [Tooltip("Time until dash is complete")] float attackTime = 0.5f;
-    [SerializeField, Range(0, 1f)] [Tooltip("Grace period for inputing an attack")] float attackBuffer = 0.2f;
+    [SerializeField, Range(0f, 50f)][Tooltip("Dash distance")] float dashDistance = 14f;
+    [SerializeField, Range(0f, 1f)][Tooltip("Time until attack is complete")] float attackTime = 0.5f;
+    [SerializeField, Range(0f, 5f)][Tooltip("Time until dash is available again")] float dashCD = 0.5f;
+    [SerializeField, Range(0, 1f)][Tooltip("Grace period for inputing an attack")] float attackBuffer = 0.2f;
 
     [Header("Current State")]
     public bool isAttacking;
@@ -23,26 +25,99 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] int attackPhase = 0;
     bool desiredAttack;
     bool canAttack = true;
+    bool canDash = true;
+    bool ghosting;
     bool onGround;
     float attackBufferTimer;
 
     void Awake()
     {
-        //Find the player's Rigidbody, Ground, and Trail Renderer
+        //Find the player's components and assigns them to variables
         body = GetComponent<Rigidbody2D>();
         ground = GetComponent<PlayerGround>();
+        ghost = GetComponent<PlayerToggleCollision>();
         trail = GetComponent<TrailRenderer>();
         sr = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        onGround = ground.GetOnGround();
+        ghosting = ghost.GetGhosting();
 
         if (onGround && !isDashing)
             attackPhase = 0;
 
-        //Adds a slight buffer before the jump input is ignored
+        AttackBuffer();
+    }
+
+    void FixedUpdate()
+    {
+        onGround = ground.GetOnGround();
+
+        if (desiredAttack)
+        {
+            switch (ghosting)
+            {
+                case true: 
+                    StartCoroutine(DashCoroutine(dashCD));
+                    break;
+                case false:
+                    StartCoroutine(AttackCoroutine(attackTime));
+                    break;
+            }
+        }
+    }
+
+    IEnumerator AttackCoroutine(float cooldown)
+    {
+        if (canAttack)
+        {
+            attackObject.SetActive(true);
+            canAttack = false;
+            desiredAttack = false;
+            isAttacking = true;
+
+            if (attackPhase == 0)
+            {
+                StartCoroutine(DashCoroutine(attackTime));
+            }
+            else if (!onGround)
+                body.velocity = new Vector2(attackDirection.normalized.x * dashDistance, attackDirection.normalized.y 
+                    * Mathf.Sqrt(dashDistance));
+
+            attackPhase += 1;
+
+            yield return new WaitForSeconds(cooldown);
+            attackObject.SetActive(false);
+            canAttack = true;
+            isAttacking = false;
+        }
+    }
+
+    IEnumerator DashCoroutine(float cooldown)
+    {
+        if (canDash || isAttacking)
+        {
+            canDash = false;
+            //Causes the player to dash forward if they are on the ground, or if its their first attack in the air
+            isDashing = true;
+            trail.emitting = true;
+
+            //Changes the player's veloctiy based on their input and dash distance
+            body.velocity = attackDirection.normalized * dashDistance;
+
+            yield return new WaitForSeconds(attackTime);
+            isDashing = false;
+            trail.emitting = false;
+
+            yield return new WaitForSeconds(cooldown);
+            canDash = true;
+        }
+    }
+
+    private void AttackBuffer()
+    {
+        //Adds a slight buffer before the attack input is ignored
         if (desiredAttack)
         {
             attackBufferTimer += Time.deltaTime;
@@ -55,48 +130,12 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
-    {
-        if (desiredAttack)
-            StartCoroutine(AttackCoroutine());
-    }
-
-    IEnumerator AttackCoroutine()
-    {
-        if (canAttack)
-        {
-            attackObject.SetActive(true);
-            canAttack = false;
-            desiredAttack = false;
-            isAttacking = true;
-
-            //Causes the player to dash forward if they are on the ground, or if its their first attack in the air
-            if (attackPhase == 0)
-            {
-                isDashing = true;
-                trail.emitting = true;
-                //Changes the player's veloctiy based on their input and dash distance
-                body.velocity = attackDirection.normalized * dashDistance;
-            }
-            else if (!onGround)
-                body.velocity = new Vector2(attackDirection.normalized.x * dashDistance, 
-                    attackDirection.normalized.y * Mathf.Sqrt(dashDistance));
-
-            attackPhase += 1;
-
-            yield return new WaitForSeconds(attackTime);
-            attackObject.SetActive(false);
-            canAttack = true;
-            isAttacking = false;
-            isDashing = false;
-            trail.emitting = false;
-        }
-    }
-
+    //Input Methods
+    #region
     public void OnMouseDirection(InputAction.CallbackContext context)
     {
         //Only fires code if the camera is active to prevent errors
-        if(Camera.main != null)
+        if (Camera.main != null)
         {
             //Checks player and mouse position and stores them as variables
             Vector2 playerPosition = Camera.main.WorldToViewportPoint(transform.position);
@@ -115,22 +154,25 @@ public class PlayerAttack : MonoBehaviour
 
     public void OnGamepadDirection(InputAction.CallbackContext context)
     {
-        //Reads the directional input of the player as well as their current position
-        Vector2 playerPosition = Camera.main.WorldToViewportPoint(transform.position);
-        Vector2 gamepadDir = context.ReadValue<Vector2>().normalized;
+        if (Camera.main != null)
+        {
+            //Reads the directional input of the player as well as their current position
+            Vector2 playerPosition = Camera.main.WorldToViewportPoint(transform.position);
+            Vector2 gamepadDir = context.ReadValue<Vector2>().normalized;
 
-        //If player is not inputting a direction, then the direction will default to forward
-        if (gamepadDir.x == 0 && gamepadDir.y == 0)
-            gamepadDir.x = sr.flipX ? -1 : 1;
+            //If player is not inputting a direction, then the direction will default to forward
+            if (gamepadDir.x == 0 && gamepadDir.y == 0)
+                gamepadDir.x = sr.flipX ? -1 : 1;
 
-        float angle = AngleBetweenTwoPoints(playerPosition, playerPosition + gamepadDir.normalized);
+            float angle = AngleBetweenTwoPoints(playerPosition, playerPosition + gamepadDir.normalized);
 
-        //Changes the rotation of the attack object so that the player slashes toward their mouse, but only when not attacking
-        if (!isAttacking)
-            attackObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+            //Changes the rotation of the attack object so that the player slashes toward their mouse, but only when not attacking
+            if (!isAttacking)
+                attackObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
-        //Stores the x and y values into a normalized vector
-        attackDirection = gamepadDir;
+            //Stores the x and y values into a normalized vector
+            attackDirection = gamepadDir;
+        }
     }
 
     public void OnAttack(InputAction.CallbackContext context)
@@ -147,4 +189,5 @@ public class PlayerAttack : MonoBehaviour
     {
         return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
     }
+    #endregion
 }

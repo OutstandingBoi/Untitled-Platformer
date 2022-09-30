@@ -5,7 +5,9 @@ public class PlayerToggleCollision : MonoBehaviour
 {
     [Header("Components")]
     [SerializeField] PlayerWallDetection wallDetection;
+    Health health;
     SpriteRenderer sr;
+    new CircleCollider2D collider;
 
     [Header("Stats")]
     [SerializeField, Range(0f, 100f)] [Tooltip("The player's maximum resource to toggle collision")] float maxEnergy;
@@ -19,20 +21,33 @@ public class PlayerToggleCollision : MonoBehaviour
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
+        collider = GetComponent<CircleCollider2D>();
+        health = GetComponent<Health>();
         currentEnergy = maxEnergy;
     }
 
     void Update()
     {
+        HandleGhosting();
+    }
+
+    private void HandleGhosting()
+    {
         //Changes the player's layer depending on their input and drains or regenerates their energy accordingly
-        if ((goingGhost || wallDetection.inWall) && currentEnergy > 0)
+        if ((goingGhost || wallDetection.GetInWall()) && currentEnergy > 0)
         {
+            collider.radius = 0.22f;
             gameObject.layer = LayerMask.NameToLayer("Ghost");
             sr.color = new Color(1f, 1f, 1f, 0.5f);
             currentEnergy -= energyDrain * Time.deltaTime;
         }
+        else if (wallDetection.GetInWall() && currentEnergy <= 0)
+        {
+            health.TakeDamage(health.MaxHealth);
+        }
         else
         {
+            collider.radius = 0.495f;
             gameObject.layer = LayerMask.NameToLayer("Player");
             sr.color = new Color(1f, 1f, 1f, 1f);
             currentEnergy += energyRegen * Time.deltaTime;

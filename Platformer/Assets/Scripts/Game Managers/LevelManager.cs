@@ -10,7 +10,7 @@ using UnityEditor;
 
 public class LevelManager : MonoBehaviour
 {
-    enum ObjectiveType { LockedDoor = 1, Boss = 2, KillAllEnemies = 3 }
+    enum ObjectiveType { None = 4, LockedDoor = 1, Boss = 2, KillAllEnemies = 3 }
 
     [Header("UI Objects")]
     [SerializeField] Canvas gameOverUI;
@@ -31,6 +31,8 @@ public class LevelManager : MonoBehaviour
         //Checks which level objective is set
         switch (objective)
         {
+            case ObjectiveType.None:
+                return;
             //Subscribes to interaction events for the key, door, and exit objects
             case ObjectiveType.LockedDoor:
                 key.GetComponent<Interactable>().interacted += OnKeyInteracted;

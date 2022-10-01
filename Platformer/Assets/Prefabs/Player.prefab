@@ -686,7 +686,7 @@ MonoBehaviour:
   attackDirection: {x: 0, y: 0}
   dashDistance: 14
   attackTime: 0.2
-  dashCD: 1
+  dashCD: 1.5
   attackBuffer: 0.1
   isAttacking: 0
   isDashing: 0

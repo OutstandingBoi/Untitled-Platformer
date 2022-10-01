@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Cinemachine;
 
 public class CameraTrigger : MonoBehaviour
 {
     CinemachineVirtualCamera cam;
+    [SerializeField] int cameraNumber;
+    [SerializeField] List<Text> text = new List<Text>();
 
     void Awake()
     {
@@ -17,7 +20,15 @@ public class CameraTrigger : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             if (CameraManager.activeCamera != cam)
+            {
                 CameraManager.SwitchCamera(cam);
+                text[cameraNumber].enabled = true;
+                foreach (Text t in text)
+                {
+                    if (t != text[cameraNumber])
+                        t.enabled = false;
+                }
+            }
         }
     }
 }

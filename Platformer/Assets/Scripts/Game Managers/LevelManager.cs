@@ -10,7 +10,7 @@ using UnityEditor;
 
 public class LevelManager : MonoBehaviour
 {
-    enum ObjectiveType { None = 4, LockedDoor = 1, Boss = 2, KillAllEnemies = 3 }
+    enum ObjectiveType { None = 4, LockedDoor = 1, Boss = 2, KillAllEnemies = 3, Tutorial = 5 }
 
     [Header("UI Objects")]
     [SerializeField] Canvas gameOverUI;
@@ -44,6 +44,11 @@ public class LevelManager : MonoBehaviour
                 break;
 
             case ObjectiveType.KillAllEnemies:
+                break;
+            case ObjectiveType.Tutorial:
+                key.GetComponent<Interactable>().interacted += OnKeyInteracted;
+                door.GetComponent<Interactable>().interacted += OnDoorInteracted;
+                exit.GetComponent<Interactable>().interacted += OnExitInteracted;
                 break;
         }
     }
@@ -104,6 +109,9 @@ public class LevelManager : MonoBehaviour
 
                 case ObjectiveType.KillAllEnemies:
                     //Variables
+                    break;
+                case ObjectiveType.Tutorial:
+                    DoorVariables(levelManager);
                     break;
             }
         }

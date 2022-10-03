@@ -122,8 +122,14 @@ public class LevelManager : MonoBehaviour
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Door", GUILayout.MaxWidth(70));
             levelManager.door = (GameObject)EditorGUILayout.ObjectField(levelManager.door, typeof(GameObject), true);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Key", GUILayout.MaxWidth(70));
             levelManager.key = (GameObject)EditorGUILayout.ObjectField(levelManager.key, typeof(GameObject), true);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Exit", GUILayout.MaxWidth(70));
             levelManager.exit = (GameObject)EditorGUILayout.ObjectField(levelManager.exit, typeof(GameObject), true);
             EditorGUILayout.EndHorizontal();

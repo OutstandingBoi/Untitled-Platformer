@@ -4,15 +4,39 @@ using UnityEngine;
 
 public class Attack : MonoBehaviour
 {
-    [Header("Attack Stats")]
-    [SerializeField, Range(0f, 100f)] [Tooltip("The amount of damage the attack deals")] float damage;
+    Collider2D attackCollider;
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    [Header("Attack Stats")]
+    [SerializeField, Range(0f, 100f)] [Tooltip("The amount of damage the attack deals")] public float damage;
+
+    void Awake()
     {
-        if (collision.GetComponent<Health>() != null)
+        attackCollider = GetComponent<Collider2D>();
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(attackCollider != null && attackCollider.isTrigger == true)
         {
-            Health target = collision.GetComponent<Health>();
-            target.TakeDamage(damage);
+            if (collision.GetComponent<Health>() != null)
+            {
+                Health target = collision.GetComponent<Health>();
+                target.TakeDamage(damage);
+            }
         }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (attackCollider != null && attackCollider.isTrigger == false)
+        {
+            if (collision.collider.GetComponent<Health>() != null)
+            {
+                Health target = collision.collider.GetComponent<Health>();
+                target.TakeDamage(damage);
+            }
+
+        }
+
     }
 }

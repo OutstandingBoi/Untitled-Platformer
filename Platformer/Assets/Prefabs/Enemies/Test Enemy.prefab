@@ -4903,7 +4903,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25f5a7f6931f1ca4c95b8c528478a203, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 1
   currentHealth: 0
   hitStopTime: 0.1
   isEnemy: 1

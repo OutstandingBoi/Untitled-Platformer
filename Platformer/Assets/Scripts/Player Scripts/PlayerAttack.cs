@@ -7,7 +7,7 @@ public class PlayerAttack : MonoBehaviour
     [Header("Components")]
     [SerializeField] GameObject attackObject;
     Rigidbody2D body;
-    PlayerGround ground;
+    RaycastGroundDetection ground;
     PlayerToggleCollision ghost;
     TrailRenderer trail;
     SpriteRenderer sr;
@@ -34,7 +34,7 @@ public class PlayerAttack : MonoBehaviour
     {
         //Find the player's components and assigns them to variables
         body = GetComponent<Rigidbody2D>();
-        ground = GetComponent<PlayerGround>();
+        ground = GetComponent<RaycastGroundDetection>();
         ghost = GetComponent<PlayerToggleCollision>();
         trail = GetComponent<TrailRenderer>();
         sr = GetComponent<SpriteRenderer>();

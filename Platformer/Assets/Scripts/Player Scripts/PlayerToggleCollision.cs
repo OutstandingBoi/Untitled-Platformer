@@ -17,6 +17,7 @@ public class PlayerToggleCollision : MonoBehaviour
 
     [Header("Current State")]
     bool goingGhost = false;
+    bool desiredGhost;
 
     void Awake()
     {
@@ -28,6 +29,11 @@ public class PlayerToggleCollision : MonoBehaviour
 
     void Update()
     {
+        if ((desiredGhost || wallDetection.GetInWall()) && currentEnergy > energyDrain)
+            goingGhost = true;
+        else
+            goingGhost = false;
+
         HandleGhosting();
     }
 
@@ -64,10 +70,10 @@ public class PlayerToggleCollision : MonoBehaviour
     public void OnGhost(InputAction.CallbackContext context)
     {
         //Checks the player's input, if they have enough energy, and if they are toggled to have a ghost dash
-        if (context.ReadValue<float>() != 0 && currentEnergy > energyDrain)
-            goingGhost = true;
+        if (context.ReadValue<float>() != 0)
+            desiredGhost = true;
         else
-            goingGhost = false;
+            desiredGhost = false;
     }
 
     public bool GetGhosting() { return goingGhost; }

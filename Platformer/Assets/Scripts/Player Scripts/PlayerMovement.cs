@@ -5,7 +5,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Components")]
     Rigidbody2D body;
-    PlayerGround ground;
+    RaycastGroundDetection ground;
     PlayerAttack dash;
     PlayerToggleCollision ghost;
     SpriteRenderer sr;
@@ -51,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
     {
         //Find the player's Rigidbody and ground detection scripts
         body = GetComponent<Rigidbody2D>();
-        ground = GetComponent<PlayerGround>(); 
+        ground = GetComponent<RaycastGroundDetection>(); 
         dash = GetComponent<PlayerAttack>();
         ghost = GetComponent<PlayerToggleCollision>();
         sr = GetComponent<SpriteRenderer>();

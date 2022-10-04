@@ -985,7 +985,7 @@ GameObject:
   m_Layer: 0
   m_Name: Exit
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 6519382022992737161, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -19477,7 +19477,7 @@ Canvas:
   m_GameObject: {fileID: 1259949607}
   m_Enabled: 0
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 10
   m_PixelPerfect: 0
@@ -19605,7 +19605,7 @@ Canvas:
   m_GameObject: {fileID: 1327496202}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -19960,7 +19960,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1441541800}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 76a76b5e6fe858642ab5146edcc04a72, type: 3}
   m_Name: 
@@ -19995,8 +19995,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7524ceec6d4ad8040b942a0757a2704a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameOverUI: {fileID: 1259949610}
+  player: {fileID: 0}
+  gameMenuUI: {fileID: 1259949610}
   victoryText: {fileID: 250557261}
+  loseText: {fileID: 1097504628}
   objective: 5
   door: {fileID: 712520714}
   key: {fileID: 1982812527}
@@ -20421,7 +20423,7 @@ Canvas:
   m_GameObject: {fileID: 1623230465}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0

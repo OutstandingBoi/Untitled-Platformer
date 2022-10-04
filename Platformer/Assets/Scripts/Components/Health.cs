@@ -1,8 +1,12 @@
 using System.Collections;
 using UnityEngine;
 
+public delegate void PlayerDied();
+
 public class Health : MonoBehaviour
 {
+    public event PlayerDied OnDied;
+
     [Header("Components")]
     GameManager gameManager;
 
@@ -34,12 +38,12 @@ public class Health : MonoBehaviour
 
     IEnumerator Die()
     {
-        //Removes the object from the game manager's list of enemies if it is labeled as an enemy
-        if (isEnemy) gameManager.RemoveEnemy(gameObject);
-
         //Disables player specific components to prevent errors
+        //Invokes anything subscribed to the player death event
         if (isPlayer)
         {
+            OnDied?.Invoke();
+
             GetComponent<PlayerAttack>().enabled = false;
             GetComponent<PlayerMovement>().enabled = false;
             GetComponent<PlayerToggleCollision>().enabled = false;
@@ -63,7 +67,7 @@ public class Health : MonoBehaviour
 
         //Destroys the game object
         yield return new WaitForSeconds(0.1f);
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 
     IEnumerator HitStop()

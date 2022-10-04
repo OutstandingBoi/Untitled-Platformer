@@ -11,10 +11,14 @@ using UnityEditor;
 public class LevelManager : MonoBehaviour
 {
     enum ObjectiveType { None = 4, LockedDoor = 1, Boss = 2, KillAllEnemies = 3, Tutorial = 5 }
+    [HideInInspector] enum GameState { Loss = 0, Victory = 1, Pause = 2, Gameplay = 3 }
+    GameState gameState;
+
+    [SerializeField] GameObject player;
 
     [Header("UI Objects")]
-    [SerializeField] Canvas gameOverUI;
-    [SerializeField] Text victoryText;
+    [SerializeField] Canvas gameMenuUI;
+    [SerializeField] Text victoryText, loseText;
 
     [Header("Level Objective Type")]
     [SerializeField] ObjectiveType objective;
@@ -28,6 +32,14 @@ public class LevelManager : MonoBehaviour
 
     void Awake()
     {
+        gameState = GameState.Gameplay;
+        ToggleUI();
+
+        //Finds the player object in the scene
+        //player = GameObject.FindGameObjectWithTag("Player");
+
+        player.GetComponent<Health>().OnDied += GameOver;
+
         //Checks which level objective is set
         switch (objective)
         {
@@ -53,16 +65,53 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    void GameOver()
+    {
+        gameState = GameState.Loss;
+        ToggleUI();
+    }
+
+    void ToggleUI()
+    {
+        //Stores the game's default time scale into a variable and then pauses the game
+        var defaultTimeScale = Time.timeScale;
+        Time.timeScale = 0;
+
+        gameMenuUI.enabled = true;
+
+        //Changes UI toggles based on current game state
+        switch (gameState)
+        {
+            case GameState.Loss:
+                loseText.enabled = true;
+                break;
+
+            case GameState.Victory:
+                victoryText.enabled = true;
+                break;
+
+            case GameState.Pause:
+                break;
+
+            case GameState.Gameplay:
+                gameMenuUI.enabled = false;
+                loseText.enabled = false;
+                victoryText.enabled = false;
+                Time.timeScale = defaultTimeScale;
+                break;
+        }
+    }
+
     //Is called when the player interacts with the gameobject set to exit
-    private void OnExitInteracted()
+    void OnExitInteracted()
     {
         //enables the level complete UI elements
-        gameOverUI.enabled = true;
-        victoryText.enabled = true;
+        gameState = GameState.Victory;
+        ToggleUI();
     }
 
     //Is called when the player interacts with the gameobject set to key
-    private void OnKeyInteracted()
+    void OnKeyInteracted()
     {
         //Sets the hasKey boolean to true if the player does not already have it and then disables the key object
         if (!hasKey)
@@ -71,7 +120,7 @@ public class LevelManager : MonoBehaviour
     }
 
     //Is called when the player interacts with the gameobject set to door
-    private void OnDoorInteracted()
+    void OnDoorInteracted()
     {
         //Is called when the 
         if (hasKey)
@@ -82,65 +131,65 @@ public class LevelManager : MonoBehaviour
     }
 
     #region editor
-#if UNITY_EDITOR
-
-    [CustomEditor(typeof(LevelManager))]
-    public class LevelManagerEditor : Editor
-    {
-        public override void OnInspectorGUI()
+    #if UNITY_EDITOR
+        [CustomEditor(typeof(LevelManager))]
+        public class LevelManagerEditor : Editor
         {
-            base.OnInspectorGUI();
-
-            LevelManager levelManager = (LevelManager)target;
-
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Objective Objects", EditorStyles.boldLabel);
-
-            //Checks what the level's objective is set to and draws its variables in the inspector
-            switch (levelManager.objective)
+            public override void OnInspectorGUI()
             {
-                case ObjectiveType.LockedDoor:
-                    DoorVariables(levelManager);
-                    break;
+                base.OnInspectorGUI();
 
-                case ObjectiveType.Boss:
-                    //Variables
-                    break;
+                LevelManager levelManager = (LevelManager)target;
 
-                case ObjectiveType.KillAllEnemies:
-                    //Variables
-                    break;
-                case ObjectiveType.Tutorial:
-                    DoorVariables(levelManager);
-                    break;
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Objective Objects", EditorStyles.boldLabel);
+
+                //Checks what the level's objective is set to and draws its variables in the inspector
+                switch (levelManager.objective)
+                {
+                    case ObjectiveType.LockedDoor:
+                        DoorVariables(levelManager);
+                        break;
+
+                    case ObjectiveType.Boss:
+                        //Variables
+                        break;
+
+                    case ObjectiveType.KillAllEnemies:
+                        //Variables
+                        break;
+                    case ObjectiveType.Tutorial:
+                        DoorVariables(levelManager);
+                        break;
+                }
+            }
+
+            private static void DoorVariables(LevelManager levelManager)
+            {
+                //Sets up serialized variables in the Unity inspector
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Door", GUILayout.MaxWidth(70));
+                levelManager.door = (GameObject)EditorGUILayout.ObjectField(levelManager.door, typeof(GameObject), true);
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Key", GUILayout.MaxWidth(70));
+                levelManager.key = (GameObject)EditorGUILayout.ObjectField(levelManager.key, typeof(GameObject), true);
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Exit", GUILayout.MaxWidth(70));
+                levelManager.exit = (GameObject)EditorGUILayout.ObjectField(levelManager.exit, typeof(GameObject), true);
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Has Key", GUILayout.MaxWidth(70));
+                levelManager.hasKey = EditorGUILayout.Toggle(levelManager.hasKey, GUILayout.Width(50));
+                EditorGUILayout.EndHorizontal();
             }
         }
 
-        private static void DoorVariables(LevelManager levelManager)
-        {
-            //Sets up serialized variables in the Unity inspector
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Door", GUILayout.MaxWidth(70));
-            levelManager.door = (GameObject)EditorGUILayout.ObjectField(levelManager.door, typeof(GameObject), true);
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Key", GUILayout.MaxWidth(70));
-            levelManager.key = (GameObject)EditorGUILayout.ObjectField(levelManager.key, typeof(GameObject), true);
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Exit", GUILayout.MaxWidth(70));
-            levelManager.exit = (GameObject)EditorGUILayout.ObjectField(levelManager.exit, typeof(GameObject), true);
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Has Key", GUILayout.MaxWidth(70));
-            levelManager.hasKey = EditorGUILayout.Toggle(levelManager.hasKey, GUILayout.Width(50));
-            EditorGUILayout.EndHorizontal();
-        }
-    }
-
-#endif
+    #endif
     #endregion
+
 }
